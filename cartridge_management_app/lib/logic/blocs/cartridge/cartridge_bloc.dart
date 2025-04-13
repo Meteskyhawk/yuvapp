@@ -63,7 +63,38 @@ class CartridgeBloc extends Bloc<CartridgeEvent, CartridgeState> {
       DeleteCartridge event, Emitter<CartridgeState> emit) async {
     emit(CartridgeLoading());
     try {
+      // Get the deleted cartridge's slot before deleting it
+      final cartridges = await repository.getAllCartridges();
+      final deletedCartridge = cartridges.firstWhere(
+        (c) => c.id == event.id,
+        orElse: () => CartridgeModel(
+          id: '',
+          colorCode: '',
+          quantity: 0,
+          slot: -1,
+        ),
+      );
+
+      // Delete the cartridge
       await repository.deleteCartridge(event.id);
+
+      // If the slot was valid, reindex all higher slot numbers
+      if (deletedCartridge.slot > 0) {
+        // Get all remaining cartridges
+        final remainingCartridges = await repository.getAllCartridges();
+
+        // Update slots for all cartridges with slot numbers higher than the deleted one
+        for (var cartridge in remainingCartridges) {
+          if (cartridge.slot > deletedCartridge.slot) {
+            // Decrement the slot number by 1
+            final updatedCartridge =
+                cartridge.copyWith(slot: cartridge.slot - 1);
+            await repository.updateCartridge(updatedCartridge);
+          }
+        }
+      }
+
+      // Reload cartridges to update the UI
       add(LoadCartridges());
     } catch (e) {
       emit(CartridgeError('Failed to delete cartridge: $e'));

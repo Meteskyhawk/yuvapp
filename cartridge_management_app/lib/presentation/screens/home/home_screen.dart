@@ -312,49 +312,48 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Row(
                                 children: [
                                   Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: const Color(0xFFE0E0E0),
+                                      image: DecorationImage(
+                                        image:
+                                            AssetImage('assets/greyholder.png'),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: color.backgroundColor,
-                                          border: color.hasBorder
-                                              ? Border.all(
-                                                  color: Colors.grey[400]!)
-                                              : null,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            color.code,
-                                            style: TextStyle(
-                                              color: color.textColor,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
+                                    child: Center(
+                                      child: Align(
+                                        alignment: const Alignment(0, -0.18),
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: color.backgroundColor,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              color.code,
+                                              style: TextStyle(
+                                                color: color.textColor,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: 80),
                                   Expanded(
                                     child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
                                       children: [
                                         Expanded(
+                                          flex: 1,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -367,62 +366,81 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: Colors.grey[300]!),
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                                child: InkWell(
-                                                  onTap: () async {
-                                                    final result =
-                                                        await showDialog<int>(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          SlotPickerDialog(
-                                                        currentSlot:
-                                                            cartridge.slot,
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Container(
+                                                  width: 60,
+                                                  height: 40,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 0),
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.grey[300]!),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: InkWell(
+                                                    onTap: () async {
+                                                      final result =
+                                                          await showDialog<int>(
+                                                        context: context,
+                                                        builder: (context) =>
+                                                            SlotPickerDialog(
+                                                          currentSlot:
+                                                              cartridge.slot,
+                                                        ),
+                                                      );
+                                                      if (result != null) {
+                                                        context
+                                                            .read<
+                                                                CartridgeBloc>()
+                                                            .add(
+                                                              UpdateCartridge(
+                                                                cartridge
+                                                                    .updateSlot(
+                                                                        result),
+                                                              ),
+                                                            );
+                                                      }
+                                                    },
+                                                    child: Center(
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Text(
+                                                            cartridge.slot
+                                                                .toString(),
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                          const Icon(
+                                                              Icons
+                                                                  .arrow_drop_down,
+                                                              color:
+                                                                  Colors.grey,
+                                                              size: 18),
+                                                        ],
                                                       ),
-                                                    );
-                                                    if (result != null) {
-                                                      context
-                                                          .read<CartridgeBloc>()
-                                                          .add(
-                                                            UpdateCartridge(
-                                                              cartridge
-                                                                  .updateSlot(
-                                                                      result),
-                                                            ),
-                                                          );
-                                                    }
-                                                  },
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        cartridge.slot
-                                                            .toString(),
-                                                        style: const TextStyle(
-                                                            fontSize: 16),
-                                                      ),
-                                                      const Icon(
-                                                          Icons.arrow_drop_down,
-                                                          color: Colors.grey),
-                                                    ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 16),
                                         Expanded(
+                                          flex: 1,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -435,54 +453,73 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 8),
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: Colors.grey[300]!),
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                                child: InkWell(
-                                                  onTap: () async {
-                                                    final result =
-                                                        await showDialog<int>(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          QuantityPickerDialog(
-                                                        currentQuantity:
-                                                            cartridge.quantity,
-                                                      ),
-                                                    );
-                                                    if (result != null) {
-                                                      context
-                                                          .read<CartridgeBloc>()
-                                                          .add(
-                                                            UpdateCartridge(
+                                              Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Container(
+                                                  width: 80,
+                                                  height: 40,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 0),
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.grey[300]!),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: InkWell(
+                                                    onTap: () async {
+                                                      final result =
+                                                          await showDialog<int>(
+                                                        context: context,
+                                                        builder: (context) =>
+                                                            QuantityPickerDialog(
+                                                          currentQuantity:
                                                               cartridge
-                                                                  .updateQuantity(
-                                                                      result),
-                                                            ),
-                                                          );
-                                                    }
-                                                  },
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        cartridge.quantity
-                                                            .toString(),
-                                                        style: const TextStyle(
-                                                            fontSize: 16),
+                                                                  .quantity,
+                                                        ),
+                                                      );
+                                                      if (result != null) {
+                                                        context
+                                                            .read<
+                                                                CartridgeBloc>()
+                                                            .add(
+                                                              UpdateCartridge(
+                                                                cartridge
+                                                                    .updateQuantity(
+                                                                        result),
+                                                              ),
+                                                            );
+                                                      }
+                                                    },
+                                                    child: Center(
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Text(
+                                                            cartridge.quantity
+                                                                .toString(),
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        16),
+                                                          ),
+                                                          const Icon(
+                                                              Icons.close,
+                                                              color:
+                                                                  Colors.grey,
+                                                              size: 18),
+                                                        ],
                                                       ),
-                                                      const Icon(Icons.close,
-                                                          color: Colors.grey,
-                                                          size: 20),
-                                                    ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -495,9 +532,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.delete_outline),
                                     onPressed: () {
+                                      final currentSlot = cartridge.slot;
                                       context
                                           .read<CartridgeBloc>()
                                           .add(DeleteCartridge(cartridge.id));
+
+                                      // Show message about slot reindexing
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Cartridge deleted. Slot numbers reindexed.',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          backgroundColor: Colors.black,
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
                                     },
                                   ),
                                 ],

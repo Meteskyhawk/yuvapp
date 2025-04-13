@@ -56,8 +56,8 @@ class CarouselScreen extends StatelessWidget {
                 Expanded(
                   child: Center(
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      height: MediaQuery.of(context).size.width * 0.9,
+                      width: MediaQuery.of(context).size.width * 0.98,
+                      height: MediaQuery.of(context).size.width * 0.98,
                       child: Stack(
                         alignment: Alignment.center,
                         children: List.generate(totalSlots, (index) {
@@ -74,8 +74,8 @@ class CarouselScreen extends StatelessWidget {
 
                           return Transform.translate(
                             offset: Offset(
-                              math.cos(angle - math.pi / 2) * 160,
-                              math.sin(angle - math.pi / 2) * 160,
+                              math.cos(angle - math.pi / 2) * 170,
+                              math.sin(angle - math.pi / 2) * 170,
                             ),
                             child: CartridgeSlot(
                               cartridge: cartridge,
@@ -96,9 +96,10 @@ class CarouselScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ...cartridges.where((c) {
-                        // Only show cartridges that are either High or part of duplicates
+                        // Only show cartridges that are either High, Change Now, or part of duplicates
                         return c.colorCode.isNotEmpty &&
                             (c.quantity >= 200 ||
+                                c.quantity < 30 ||
                                 duplicates.contains(c.colorCode));
                       }).map((cartridge) {
                         final color =
@@ -124,6 +125,9 @@ class CarouselScreen extends StatelessWidget {
                         } else if (cartridge.quantity >= 200) {
                           status = 'High';
                           statusColor = Colors.black;
+                        } else if (cartridge.quantity < 30) {
+                          status = 'Change cartridge';
+                          statusColor = Colors.orange;
                         } else {
                           return const SizedBox.shrink();
                         }
@@ -138,15 +142,38 @@ class CarouselScreen extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  MetallicCartridgeIndicator(
-                                      cartridge: cartridge),
-                                  Text(
-                                    status,
-                                    style: TextStyle(
-                                      color: statusColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                                  Container(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image:
+                                            AssetImage('assets/greyholder.png'),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    child: MetallicCartridgeIndicator(
+                                      cartridge: cartridge,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 16.0),
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          status,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -198,27 +225,44 @@ class CartridgeSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.3),
-          width: 1,
-          style: isEmpty ? BorderStyle.none : BorderStyle.solid,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Dashed circle outline for all slots (empty and filled)
+        SizedBox(
+          width: 90,
+          height: 90,
+          child: CustomPaint(
+            painter: DashedCirclePainter(
+              color: const Color(0xFFAAAAAA),
+              strokeWidth: 1.0,
+              dashSize: 2,
+              gapSize: 2,
+            ),
+          ),
         ),
-      ),
-      child: isEmpty
-          ? CustomPaint(
-              painter: DashedCirclePainter(
-                color: Colors.grey.withOpacity(0.3),
-                strokeWidth: 2,
-                gapSize: 5,
-                dashSize: 5,
+        // Empty or filled slot content
+        isEmpty
+            ? const SizedBox(width: 80, height: 80)
+            : SizedBox(
+                width: 90,
+                height: 90,
+                child: Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: AssetImage('assets/greyholder.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: MetallicCartridgeIndicator(cartridge: cartridge),
+                  ),
+                ),
               ),
-            )
-          : MetallicCartridgeIndicator(cartridge: cartridge),
+      ],
     );
   }
 }
@@ -236,38 +280,15 @@ class MetallicCartridgeIndicator extends StatelessWidget {
     final color = CartridgeColors.getColorByCode(cartridge.colorCode);
     if (color == null) return const SizedBox.shrink();
 
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey[300]!,
-            Colors.grey[600]!,
-          ],
-          stops: const [0.3, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(6.0),
+    return Center(
+      child: Align(
+        alignment: const Alignment(0, -0.18),
         child: Container(
+          width: 35,
+          height: 35,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color.backgroundColor,
-            border: Border.all(
-              color: Colors.grey[400]!,
-              width: 1.5,
-            ),
           ),
           child: Center(
             child: Text(
@@ -275,7 +296,7 @@ class MetallicCartridgeIndicator extends StatelessWidget {
               style: TextStyle(
                 color: color.textColor,
                 fontWeight: FontWeight.w600,
-                fontSize: 14,
+                fontSize: 13,
               ),
             ),
           ),
@@ -308,18 +329,22 @@ class DashedCirclePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    final dashCount = ((2 * math.pi * radius) / (dashSize + gapSize)).floor();
-    final dashAngle = 2 * math.pi / dashCount;
+    // Create a dotted circle (many small dots)
+    const double fullCircle = 2 * math.pi;
+    // Increase the number of dots to make them appear closer together
+    final int dotCount = 60; // More dots for a more dotted appearance
+    final double anglePerDot = fullCircle / dotCount;
 
-    for (var i = 0; i < dashCount; i++) {
-      final startAngle = i * dashAngle;
-      final endAngle =
-          startAngle + (dashAngle * dashSize / (dashSize + gapSize));
+    // Make dots very small
+    final double dotAngle = anglePerDot * 0.3; // Just a tiny arc for each dot
+
+    for (var i = 0; i < dotCount; i++) {
+      final double startAngle = i * anglePerDot;
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
-        endAngle - startAngle,
+        dotAngle,
         false,
         paint,
       );

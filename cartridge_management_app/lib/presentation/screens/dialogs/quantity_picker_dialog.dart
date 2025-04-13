@@ -31,6 +31,7 @@ class _QuantityPickerDialogState extends State<QuantityPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
       title: const Text('Enter Quantity'),
       content: TextField(
         controller: _controller,
@@ -45,13 +46,17 @@ class _QuantityPickerDialogState extends State<QuantityPickerDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: () {
             final value = int.tryParse(_controller.text);
             if (value != null && value >= 0) {
               Navigator.pop(context, value);
             }
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+          ),
           child: const Text('Save'),
         ),
       ],

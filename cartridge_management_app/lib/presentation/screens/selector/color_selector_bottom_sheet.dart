@@ -25,6 +25,8 @@ class ColorSelectorBottomSheet extends StatefulWidget {
 }
 
 class _ColorSelectorBottomSheetState extends State<ColorSelectorBottomSheet> {
+  String? selectedColorCode;
+
   @override
   Widget build(BuildContext context) {
     final colorsList = CartridgeColors.getAllColors();
@@ -38,7 +40,7 @@ class _ColorSelectorBottomSheetState extends State<ColorSelectorBottomSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Container(
             width: 40,
             height: 4,
@@ -48,135 +50,188 @@ class _ColorSelectorBottomSheetState extends State<ColorSelectorBottomSheet> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Cartridge_Selector_002',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
+            padding: const EdgeInsets.only(left: 16, top: 16),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFCE8E6),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Color(0xFFE53935),
+                    size: 18,
+                  ),
+                  padding: EdgeInsets.zero,
                   onPressed: () => Navigator.pop(context),
                 ),
-              ],
+              ),
             ),
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
+            height: MediaQuery.of(context).size.height * 0.45,
             child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
+                mainAxisSpacing: 5,
+                crossAxisSpacing: 5,
+                childAspectRatio: 1.0,
               ),
               itemCount: colors.length,
               itemBuilder: (context, index) {
                 final entry = colors.entries.elementAt(index);
+                final isSelected = selectedColorCode == entry.key;
 
                 return GestureDetector(
-                  onTap: () async {
-                    final state = context.read<CartridgeBloc>().state;
-                    if (state is CartridgeLoaded) {
-                      // Check if color is already in use
-                      final isColorDuplicate =
-                          state.cartridges.any((c) => c.colorCode == entry.key);
-
-                      if (isColorDuplicate) {
-                        // Bottom sheet'i kapat
-                        Navigator.pop(context);
-
-                        // Callback aracılığıyla ana ekrandaki hata mesajını göster
-                        if (widget.onDuplicateColor != null) {
-                          widget.onDuplicateColor!(entry.key);
-                        }
-                        return;
-                      }
-
-                      final nextSlot = _getNextAvailableSlot(context);
-                      // Check if slot is already occupied
-                      final isSlotOccupied =
-                          state.cartridges.any((c) => c.slot == nextSlot);
-
-                      if (isSlotOccupied) {
-                        // Bottom sheet'i kapat
-                        Navigator.pop(context);
-
-                        // Callback aracılığıyla ana ekrandaki hata mesajını göster
-                        if (widget.onSlotOccupied != null) {
-                          widget.onSlotOccupied!(nextSlot);
-                        }
-                        return;
-                      }
-
-                      final cartridge = CartridgeModel(
-                        id: const Uuid().v4(),
-                        colorCode: entry.key,
-                        quantity: 200,
-                        slot: nextSlot,
-                      );
-                      context
-                          .read<CartridgeBloc>()
-                          .add(AddCartridge(cartridge));
-                      Navigator.pop(context);
-                    }
+                  onTap: () {
+                    setState(() {
+                      selectedColorCode = entry.key;
+                    });
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.grey[300]!,
-                          Colors.grey[600]!,
-                        ],
-                        stops: const [0.3, 1.0],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (isSelected)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: CustomPaint(
+                              size: const Size(90, 90),
+                              painter: DashedCirclePainter(
+                                color: const Color(0xFFAAAAAA),
+                                strokeWidth: 2.0,
+                                dashSize: 1,
+                                gapSize: 1,
+                              ),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Container(
-                        decoration: BoxDecoration(
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: entry.value.backgroundColor,
-                          border: Border.all(
-                            color: Colors.grey[400]!,
-                            width: 1,
+                          image: DecorationImage(
+                            image: AssetImage('assets/greyholder.png'),
+                            fit: BoxFit.cover,
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            entry.key,
-                            style: TextStyle(
-                              color: entry.value.textColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                          child: Align(
+                            alignment: const Alignment(0, -0.18),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: entry.value.backgroundColor,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  entry.key,
+                                  style: TextStyle(
+                                    color: entry.value.textColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 );
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: TextButton(
+                onPressed: () {
+                  if (selectedColorCode != null) {
+                    _saveSelectedColor(context);
+                  }
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _saveSelectedColor(BuildContext context) async {
+    if (selectedColorCode == null) return;
+
+    final state = context.read<CartridgeBloc>().state;
+    if (state is CartridgeLoaded) {
+      // Check if color is already in use
+      final isColorDuplicate =
+          state.cartridges.any((c) => c.colorCode == selectedColorCode);
+
+      if (isColorDuplicate) {
+        // Bottom sheet'i kapat
+        Navigator.pop(context);
+
+        // Callback aracılığıyla ana ekrandaki hata mesajını göster
+        if (widget.onDuplicateColor != null) {
+          widget.onDuplicateColor!(selectedColorCode!);
+        }
+        return;
+      }
+
+      final nextSlot = _getNextAvailableSlot(context);
+      // Check if slot is already occupied
+      final isSlotOccupied = state.cartridges.any((c) => c.slot == nextSlot);
+
+      if (isSlotOccupied) {
+        // Bottom sheet'i kapat
+        Navigator.pop(context);
+
+        // Callback aracılığıyla ana ekrandaki hata mesajını göster
+        if (widget.onSlotOccupied != null) {
+          widget.onSlotOccupied!(nextSlot);
+        }
+        return;
+      }
+
+      final cartridge = CartridgeModel(
+        id: const Uuid().v4(),
+        colorCode: selectedColorCode!,
+        quantity: 200,
+        slot: nextSlot,
+      );
+      context.read<CartridgeBloc>().add(AddCartridge(cartridge));
+      Navigator.pop(context);
+    }
   }
 
   int _getNextAvailableSlot(BuildContext context) {
@@ -193,4 +248,51 @@ class _ColorSelectorBottomSheetState extends State<ColorSelectorBottomSheet> {
     }
     return usedSlots.length + 1;
   }
+}
+
+class DashedCirclePainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double dashSize;
+  final double gapSize;
+
+  DashedCirclePainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.dashSize,
+    required this.gapSize,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final double radius = size.width / 2;
+    final double centerX = size.width / 2;
+    final double centerY = size.height / 2;
+
+    // Dashed circle with more segments for better appearance
+    final int numDashes = 30;
+    final double angleDelta = 2 * 3.14159 / numDashes;
+    final double gapAngle = angleDelta * 0.35; // Gap is 35% of segment
+
+    for (int i = 0; i < numDashes; i++) {
+      final double startAngle = i * angleDelta;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(centerX, centerY), radius: radius),
+        startAngle,
+        angleDelta - gapAngle,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
