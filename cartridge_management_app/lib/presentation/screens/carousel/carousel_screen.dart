@@ -53,7 +53,9 @@ class CarouselScreen extends StatelessWidget {
 
             return Column(
               children: [
-                Expanded(
+                // Fixed height for the carousel wheel
+                SizedBox(
+                  height: MediaQuery.of(context).size.width * 0.98,
                   child: Center(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.98,
@@ -87,107 +89,114 @@ class CarouselScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Color(0xFFE0E0E0)),
+                // Scrollable area for the list
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Color(0xFFE0E0E0)),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      ...cartridges.where((c) {
-                        // Only show cartridges that are either High, Change Now, or part of duplicates
-                        return c.colorCode.isNotEmpty &&
-                            (c.quantity >= 200 ||
-                                c.quantity < 30 ||
-                                duplicates.contains(c.colorCode));
-                      }).map((cartridge) {
-                        final color =
-                            CartridgeColors.getColorByCode(cartridge.colorCode);
-                        if (color == null) return const SizedBox.shrink();
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ...cartridges.where((c) {
+                            // Only show cartridges that are either High, Change Now, or part of duplicates
+                            return c.colorCode.isNotEmpty &&
+                                (c.quantity >= 200 ||
+                                    c.quantity < 30 ||
+                                    duplicates.contains(c.colorCode));
+                          }).map((cartridge) {
+                            final color = CartridgeColors.getColorByCode(
+                                cartridge.colorCode);
+                            if (color == null) return const SizedBox.shrink();
 
-                        // For duplicates, only show "High" for the first occurrence
-                        bool isFirstOccurrence = true;
-                        if (duplicates.contains(cartridge.colorCode)) {
-                          final firstDuplicate = cartridges.firstWhere(
-                            (c) => c.colorCode == cartridge.colorCode,
-                          );
-                          isFirstOccurrence = firstDuplicate.id == cartridge.id;
-                        }
+                            // For duplicates, only show "High" for the first occurrence
+                            bool isFirstOccurrence = true;
+                            if (duplicates.contains(cartridge.colorCode)) {
+                              final firstDuplicate = cartridges.firstWhere(
+                                (c) => c.colorCode == cartridge.colorCode,
+                              );
+                              isFirstOccurrence =
+                                  firstDuplicate.id == cartridge.id;
+                            }
 
-                        String status;
-                        Color statusColor;
+                            String status;
+                            Color statusColor;
 
-                        if (duplicates.contains(cartridge.colorCode) &&
-                            !isFirstOccurrence) {
-                          status = 'Duplicated';
-                          statusColor = const Color(0xFFFF3B30);
-                        } else if (cartridge.quantity >= 200) {
-                          status = 'High';
-                          statusColor = Colors.black;
-                        } else if (cartridge.quantity < 30) {
-                          status = 'Change cartridge';
-                          statusColor = Colors.orange;
-                        } else {
-                          return const SizedBox.shrink();
-                        }
+                            if (duplicates.contains(cartridge.colorCode) &&
+                                !isFirstOccurrence) {
+                              status = 'Duplicated';
+                              statusColor = const Color(0xFFFF3B30);
+                            } else if (cartridge.quantity >= 200) {
+                              status = 'High';
+                              statusColor = Colors.black;
+                            } else if (cartridge.quantity < 30) {
+                              status = 'Change cartridge';
+                              statusColor = Colors.orange;
+                            } else {
+                              return const SizedBox.shrink();
+                            }
 
-                        return Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 90,
-                                    height: 90,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        image:
-                                            AssetImage('assets/greyholder.png'),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    child: MetallicCartridgeIndicator(
-                                      cartridge: cartridge,
-                                    ),
+                            return Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
                                   ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 16.0),
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          status,
-                                          style: TextStyle(
-                                            color: statusColor,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 90,
+                                        height: 90,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/greyholder.png'),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        child: MetallicCartridgeIndicator(
+                                          cartridge: cartridge,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              right: 16.0),
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              status,
+                                              style: TextStyle(
+                                                color: statusColor,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                            const Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: Color(0xFFE0E0E0),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ],
+                                ),
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: Color(0xFFE0E0E0),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
