@@ -1,16 +1,46 @@
-# cartridge_management_app
+# Cartridge Management App
 
-A new Flutter project.
+A Flutter application for managing cartridge inventory in YUV Lab environments. This app allows tracking of cartridges across multiple slots, monitors inventory levels, and provides visual indicators for actions required.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Home Screen**: 
+  - Inventory level monitoring for all cartridges
+  - Drag and drop reordering of cartridges
+  - Update slot positions and quantities
+  - Visual indicators for inventory status
 
-A few resources to get you started if this is your first Flutter project:
+- **Carousel View**:
+  - Visual representation of the carousel setup
+  - Highlights empty slots and duplicated cartridges
+  - Identifies cartridges that need attention (low quantities)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Synchronization**:
+  - Regular data synchronization with backend
+  - Pull-to-refresh for immediate updates
+  - Offline-first approach for reliable operation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Technology Stack
+
+- **Flutter**: Cross-platform UI framework
+- **Bloc Pattern**: For state management
+- **SQLite**: Local database for persistent storage
+- **API Integration**: For remote data synchronization
+
+## Setup Instructions
+
+1. Clone the repository
+2. Ensure Flutter is installed (version ^3.5.4)
+3. Run `flutter pub get` to install dependencies
+4. Run `flutter run` to start the application
+
+## Architecture
+
+The application follows a clean architecture approach:
+- **Data Layer**: Models, repositories, and data sources
+- **Logic Layer**: BLoC pattern for business logic
+- **Presentation Layer**: UI components and screens
+
+## Screenshots
+
+[Add screenshots of key screens here]
