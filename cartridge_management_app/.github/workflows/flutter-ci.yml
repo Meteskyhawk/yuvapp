@@ -1,0 +1,136 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  analyze-and-test:
+    name: Analyze and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./cartridge_management_app
+      
+      - name: Generate mocks
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        working-directory: ./cartridge_management_app
+      
+      - name: Verify formatting
+        run: flutter format --set-exit-if-changed lib test
+        working-directory: ./cartridge_management_app
+      
+      - name: Analyze project source
+        run: flutter analyze
+        working-directory: ./cartridge_management_app
+      
+      - name: Run tests
+        run: flutter test --coverage
+        working-directory: ./cartridge_management_app
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./cartridge_management_app/coverage/lcov.info
+          fail_ci_if_error: false
+
+  build-android:
+    name: Build Android APK
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./cartridge_management_app
+      
+      - name: Build APK
+        run: flutter build apk --release
+        working-directory: ./cartridge_management_app
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: ./cartridge_management_app/build/app/outputs/flutter-apk/app-release.apk
+
+  build-ios:
+    name: Build iOS IPA
+    needs: analyze-and-test
+    runs-on: macos-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./cartridge_management_app
+      
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+        working-directory: ./cartridge_management_app
+      
+      - name: Compress build artifacts
+        run: |
+          cd build/ios/iphoneos
+          zip -r ios-build.zip Runner.app
+        working-directory: ./cartridge_management_app
+      
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-ios
+          path: ./cartridge_management_app/build/ios/iphoneos/ios-build.zip
+
+  deploy-firebase:
+    name: Deploy to Firebase App Distribution
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download Android build
+        uses: actions/download-artifact@v3
+        with:
+          name: release-apk
+          path: ./apk
+      
+      - name: Deploy to Firebase (Android)
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_CREDENTIALS }}
+          groups: testers
+          file: ./apk/app-release.apk
+          releaseNotes: |
+            Changes in this build:
+            - ${{ github.event.head_commit.message }} 
