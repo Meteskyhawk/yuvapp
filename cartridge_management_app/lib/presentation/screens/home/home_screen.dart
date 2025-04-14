@@ -785,7 +785,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<bool> _checkApiConnection(String apiUrl) async {
     try {
       final client = http.Client();
-      // Test için geçerli bir endpoint kullan, parametreleri doğru şekilde ekle
+      // Use a valid endpoint for testing, add parameters correctly
       final response = await client
           .get(Uri.parse('$apiUrl/scheme?hex=8a4b3a&mode=analogic&count=5'));
       return response.statusCode >= 200 && response.statusCode < 300;

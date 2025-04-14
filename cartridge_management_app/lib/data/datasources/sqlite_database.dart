@@ -96,7 +96,7 @@ class SQLiteDatabase {
   Future<void> resetToDefault() async {
     final db = await database;
     await db.delete('cartridges');
-    // Burada varsayılan kartuşları ekleyebilirsiniz
+    // You can add default cartridges here
   }
 
   Future<void> updateSlotOrder(List<CartridgeModel> cartridges) async {

@@ -26,10 +26,10 @@ class HttpRemoteDataSource implements RemoteDataSource {
   @override
   Future<List<CartridgeModel>> getAllCartridges() async {
     try {
-      // Not: Gerçek API olmadığı için, API verisi simülasyonunu kaldırıyoruz
-      // ve her seferinde boş liste döndürüyoruz, böylece otomatik ekleme olmayacak
+      // Note: Since there is no real API, we're removing the API data simulation
+      // and returning an empty list each time to prevent automatic additions
       print('Using empty cartridges list from remote source');
-      return []; // Boş liste döndür, otomatik ekleme yapma
+      return []; // Return empty list, do not make automatic additions
     } catch (e) {
       print('Network error in getAllCartridges: $e');
       return [];
@@ -51,28 +51,28 @@ class HttpRemoteDataSource implements RemoteDataSource {
 
   @override
   Future<void> insertCartridge(CartridgeModel cartridge) async {
-    // Not: TheColorAPI bu operasyonu desteklemiyor, simüle et
+    // Note: TheColorAPI doesn't support this operation, simulate it
     print('Simulating insert cartridge: ${cartridge.id}');
     return Future.delayed(const Duration(milliseconds: 300));
   }
 
   @override
   Future<void> updateCartridge(CartridgeModel cartridge) async {
-    // Not: TheColorAPI bu operasyonu desteklemiyor, simüle et
+    // Note: TheColorAPI doesn't support this operation, simulate it
     print('Simulating update cartridge: ${cartridge.id}');
     return Future.delayed(const Duration(milliseconds: 300));
   }
 
   @override
   Future<void> deleteCartridge(String id) async {
-    // Not: TheColorAPI bu operasyonu desteklemiyor, simüle et
+    // Note: TheColorAPI doesn't support this operation, simulate it
     print('Simulating delete cartridge: $id');
     return Future.delayed(const Duration(milliseconds: 300));
   }
 
   @override
   Future<void> syncCartridges(List<CartridgeModel> cartridges) async {
-    // Not: TheColorAPI bu operasyonu desteklemiyor, simüle et
+    // Note: TheColorAPI doesn't support this operation, simulate it
     print('Simulating sync cartridges: ${cartridges.length} items');
     return Future.delayed(const Duration(milliseconds: 500));
   }
@@ -80,13 +80,13 @@ class HttpRemoteDataSource implements RemoteDataSource {
   @override
   Future<void> fetchColors() async {
     try {
-      // TheColorAPI için doğru endpoint'i kullan
+      // Use the correct endpoint for TheColorAPI
       final response = await client
           .get(Uri.parse('$apiUrl/scheme?hex=8a4b3a&mode=analogic&count=5'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // TODO: API'den dönen renkleri işle ve depolama işlemini gerçekleştir
+        // TODO: Process and store the colors returned from the API
         print('Colors fetched successfully: $data');
       } else {
         print('Failed to load colors: ${response.statusCode}');

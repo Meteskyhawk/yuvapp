@@ -23,11 +23,11 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
   @override
   void initState() {
     super.initState();
-    // TheColorAPI URL'sini kullan
+    // Use TheColorAPI URL
     _testApiConnection();
   }
 
-  // API bağlantısını test edelim
+  // Test API connection
   Future<void> _testApiConnection() async {
     setState(() {
       _isLoading = true;
@@ -73,7 +73,7 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
         _errorMessage = '';
       });
 
-      // API'dan gelen her rengi CartridgeColors'a da kaydet
+      // Save each color from API to CartridgeColors
       for (final color in colors) {
         await CartridgeColors.addOrUpdateColor(color);
       }
@@ -85,7 +85,7 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
     }
   }
 
-  // Renk ekleyince renk listesini güncelle
+  // Update color list when adding a color
   void _addColor(CartridgeColor newColor) async {
     try {
       final success = await _apiService.addColor(newColor);
@@ -95,7 +95,7 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
           allColors = [...allColors, newColor];
         });
 
-        // CartridgeColors'a da ekleme yap
+        // Also add to CartridgeColors
         await CartridgeColors.addOrUpdateColor(newColor);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,13 +113,13 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
     }
   }
 
-  // Renk güncelleme
+  // Update color
   void _updateColor(CartridgeColor updatedColor) async {
     try {
       final success = await _apiService.updateColor(updatedColor);
 
       if (success) {
-        // Renk güncellendiğinde listeyi güncelle
+        // Update list when color is updated
         final index = allColors.indexWhere((c) => c.code == updatedColor.code);
         if (index != -1) {
           final newColors = List<CartridgeColor>.from(allColors);
@@ -130,7 +130,7 @@ class _ColorPaletteManagerDialogState extends State<ColorPaletteManagerDialog> {
           });
         }
 
-        // CartridgeColors'a da güncelleme yap
+        // Also update in CartridgeColors
         await CartridgeColors.addOrUpdateColor(updatedColor);
 
         ScaffoldMessenger.of(context).showSnackBar(

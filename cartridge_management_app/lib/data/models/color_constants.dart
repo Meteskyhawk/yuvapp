@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:async';
 
 class CartridgeColors {
-  // Sabit renk listesi (varsayılan)
+  // Fixed color list (default)
   static const Map<String, CartridgeColor> _defaultColors = {
     'BLA': CartridgeColor(
       code: 'BLA',
@@ -68,15 +68,15 @@ class CartridgeColors {
     ),
   };
 
-  // Dinamik renk listesi (API'dan ve yerel değişikliklerden)
+  // Dynamic color list (from API and local changes)
   static Map<String, CartridgeColor> _customColors = {};
 
-  // Sistem başlatıldığında kayıtlı renkleri yükle
+  // Load saved colors when system starts
   static Future<void> loadSavedColors() async {
     try {
       SharedPreferences? prefs;
       try {
-        // Timeout ile yakalayabilmek için try-catch kullanıyoruz
+        // Use try-catch to handle timeout
         prefs = await SharedPreferences.getInstance()
             .timeout(const Duration(seconds: 5));
       } catch (timeoutError) {
@@ -84,7 +84,7 @@ class CartridgeColors {
         prefs = null;
       }
 
-      // Prefs null ise işlemi sonlandır
+      // End operation if prefs is null
       if (prefs == null) return;
 
       final savedColors = prefs.getStringList('custom_colors');
@@ -105,23 +105,23 @@ class CartridgeColors {
         }
       }
     } catch (e) {
-      // Hata durumunda sadece logla, uygulamayı çökertme
+      // Only log in case of error, don't crash the app
       print('Failed to load saved colors: $e');
-      // Hatanın kaynağını daha detaylı görmek için
+      // To see the error source in more detail
       print('Error type: ${e.runtimeType}');
       print('Error stack: ${StackTrace.current}');
 
-      // Hata oluşursa boş bir map ile devam et
+      // Continue with an empty map if error occurs
       _customColors = {};
     }
   }
 
-  // Renkleri SharedPreferences'e kaydet
+  // Save colors to SharedPreferences
   static Future<void> _saveColors() async {
     try {
       SharedPreferences? prefs;
       try {
-        // Timeout ile yakalayabilmek için try-catch kullanıyoruz
+        // Use try-catch to handle timeout
         prefs = await SharedPreferences.getInstance()
             .timeout(const Duration(seconds: 5));
       } catch (timeoutError) {
@@ -129,7 +129,7 @@ class CartridgeColors {
         prefs = null;
       }
 
-      // Prefs null ise işlemi sonlandır
+      // End operation if prefs is null
       if (prefs == null) return;
 
       final colorsList = _customColors.values.map((color) {
@@ -146,21 +146,21 @@ class CartridgeColors {
       await prefs.setStringList('custom_colors', colorsList);
     } catch (e) {
       print('Failed to save colors: $e');
-      // Hata stackini logla
+      // Log error stack
       print('Error stack: ${StackTrace.current}');
     }
   }
 
-  // Yeni renk ekle veya varsa güncelle
+  // Add new color or update if exists
   static Future<bool> addOrUpdateColor(CartridgeColor color) async {
     _customColors[color.code] = color;
     await _saveColors();
     return true;
   }
 
-  // Renk silme
+  // Delete color
   static Future<bool> deleteColor(String code) async {
-    // Varsayılan renkleri silmeye izin verme
+    // Don't allow deletion of default colors
     if (_defaultColors.containsKey(code)) return false;
 
     _customColors.remove(code);
@@ -169,12 +169,12 @@ class CartridgeColors {
   }
 
   static CartridgeColor? getColorByCode(String code) {
-    // Önce özel renklere bak, yoksa varsayılan renklere
+    // First check custom colors, then default colors
     return _customColors[code] ?? _defaultColors[code];
   }
 
   static List<CartridgeColor> getAllColors() {
-    // Tüm renkleri birleştir (özel renkler öncelikli)
+    // Combine all colors (custom colors take priority)
     final Map<String, CartridgeColor> allColors = {}
       ..addAll(_defaultColors)
       ..addAll(_customColors);
