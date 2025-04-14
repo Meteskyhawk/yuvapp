@@ -4,12 +4,12 @@ import 'package:http/http.dart' as http;
 import '../models/color_model.dart';
 import 'dart:developer' as developer;
 
-/// API servis sınıfı - renk paletlerini TheColorAPI'den yönetmek için
+/// API service class - for managing color palettes from TheColorAPI
 class ApiService {
   // TheColorAPI base URL
   static const String baseUrl = 'https://www.thecolorapi.com';
 
-  // HTTP istemcisi
+  // HTTP client
   http.Client _client;
 
   // Singleton pattern
@@ -24,7 +24,7 @@ class ApiService {
 
   ApiService._internal() : _client = http.Client();
 
-  /// API URL'sini dışarıdan ayarlamak için
+  /// To set API URL from outside
   static String? _customBaseUrl;
 
   static void setBaseUrl(String url) {
@@ -34,10 +34,10 @@ class ApiService {
 
   static String get apiBaseUrl => _customBaseUrl ?? baseUrl;
 
-  /// Renkleri API'den getir
+  /// Get colors from API
   Future<List<CartridgeColor>> getColors() async {
     try {
-      // TheColorAPI'den renk şeması al (default olarak analogic mod kullanıyoruz)
+      // Get color scheme from TheColorAPI (using analogic mode by default)
       final url = '$apiBaseUrl/scheme?hex=8a4b3a&mode=analogic&count=5';
       developer.log('Fetching colors from: $url', name: 'ApiService');
 
@@ -54,11 +54,11 @@ class ApiService {
           name: 'ApiService');
 
       if (response.statusCode == 200) {
-        // TheColorAPI'nin yanıtındaki renkleri parse et
+        // Parse colors from TheColorAPI response
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> colorsData = data['colors'] as List<dynamic>;
 
-        // CartridgeColor listesine dönüştür
+        // Convert to CartridgeColor list
         return colorsData.map((colorData) {
           final hex = colorData['hex']['value'] as String;
           final name = colorData['name']['value'] as String;
@@ -82,7 +82,7 @@ class ApiService {
     }
   }
 
-  /// Test amacıyla API bağlantısını kontrol et
+  /// Test API connection for testing purposes
   Future<bool> testApiConnection() async {
     try {
       final response = await http
@@ -95,11 +95,11 @@ class ApiService {
     }
   }
 
-  /// Yeni renk ekle (TheColorAPI gerçek bir kaydetme işlevine sahip değil, bu yüzden sadece
-  /// yerel olarak çalışacak şekilde bir simülasyon yapıyoruz)
+  /// Add new color (TheColorAPI doesn't have a real save function, so we're simulating
+  /// it to work locally)
   Future<bool> addColor(CartridgeColor color) async {
     try {
-      // Simüle edilmiş başarılı bir cevap
+      // Simulated successful response
       await Future.delayed(const Duration(milliseconds: 800));
       return true;
     } catch (e) {
@@ -108,10 +108,10 @@ class ApiService {
     }
   }
 
-  /// Renk güncelle (Simüle edilmiş)
+  /// Update color (Simulated)
   Future<bool> updateColor(CartridgeColor color) async {
     try {
-      // Simüle edilmiş başarılı bir cevap
+      // Simulated successful response
       await Future.delayed(const Duration(milliseconds: 800));
       return true;
     } catch (e) {
@@ -120,10 +120,10 @@ class ApiService {
     }
   }
 
-  /// Renk sil (Simüle edilmiş)
+  /// Delete color (Simulated)
   Future<bool> deleteColor(String colorCode) async {
     try {
-      // Simüle edilmiş başarılı bir cevap
+      // Simulated successful response
       await Future.delayed(const Duration(milliseconds: 800));
       return true;
     } catch (e) {
@@ -132,7 +132,7 @@ class ApiService {
     }
   }
 
-  /// Hex string'i Color nesnesine çevirir
+  /// Convert hex string to Color object
   Color _hexToColor(String hex) {
     try {
       if (hex.startsWith('#')) {
@@ -145,30 +145,30 @@ class ApiService {
     } catch (e) {
       developer.log('Error converting hex to color: $e, hex: $hex',
           name: 'ApiService');
-      return Colors.black; // Varsayılan renk
+      return Colors.black; // Default color
     }
   }
 
-  /// Color nesnesini hex string'e çevirir
+  /// Convert Color object to hex string
   String _colorToHex(Color color) {
     try {
       return '#${color.value.toRadixString(16).substring(2)}';
     } catch (e) {
       developer.log('Error converting color to hex: $e', name: 'ApiService');
-      return '#000000'; // Varsayılan hex değeri
+      return '#000000'; // Default hex value
     }
   }
 
-  /// Rengin açık veya koyu olduğunu kontrol eder
+  /// Check if color is light or dark
   bool _isLightColor(Color color) {
-    // Rengin parlaklığını hesapla (0-255 arasında)
+    // Calculate color brightness (between 0-255)
     final brightness =
         (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue);
-    // 128'den büyükse açık renk olarak kabul edilir
+    // If greater than 128, it's considered a light color
     return brightness > 128;
   }
 
-  /// Arka plan rengine göre kontrastlı metin rengi döndürür
+  /// Returns contrasting text color based on background color
   Color _getContrastingTextColor(Color backgroundColor) {
     return _isLightColor(backgroundColor) ? Colors.black : Colors.white;
   }
